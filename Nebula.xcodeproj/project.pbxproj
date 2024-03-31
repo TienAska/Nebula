@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		221C95F12BB903A900DD5591 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 221C95F02BB903A900DD5591 /* Shaders.metal */; };
 		22DC39A82BB79A5B00CC18DE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22DC39A72BB79A5B00CC18DE /* AppDelegate.swift */; };
 		22DC39AA2BB79A5B00CC18DE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22DC39A92BB79A5B00CC18DE /* SceneDelegate.swift */; };
 		22DC39AC2BB79A5B00CC18DE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22DC39AB2BB79A5B00CC18DE /* ViewController.swift */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		221C95F02BB903A900DD5591 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		22DC39A42BB79A5B00CC18DE /* Nebula.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nebula.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		22DC39A72BB79A5B00CC18DE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		22DC39A92BB79A5B00CC18DE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 				22DC39B02BB79A5C00CC18DE /* Assets.xcassets */,
 				22DC39B22BB79A5C00CC18DE /* LaunchScreen.storyboard */,
 				22DC39B52BB79A5C00CC18DE /* Info.plist */,
+				221C95F02BB903A900DD5591 /* Shaders.metal */,
 			);
 			path = Nebula;
 			sourceTree = "<group>";
@@ -138,6 +141,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				221C95F12BB903A900DD5591 /* Shaders.metal in Sources */,
 				22DC39AC2BB79A5B00CC18DE /* ViewController.swift in Sources */,
 				22DC39A82BB79A5B00CC18DE /* AppDelegate.swift in Sources */,
 				22DC39AA2BB79A5B00CC18DE /* SceneDelegate.swift in Sources */,
