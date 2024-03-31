@@ -38,8 +38,7 @@ class ViewController: UIViewController {
         
         let pipelineOption = MTLPipelineOption()
         
-        let ret = try! device.makeRenderPipelineState(descriptor: pipelineStateDesc, options: pipelineOption)
-        pipelineState = ret.0
+        (pipelineState, _) = try! device.makeRenderPipelineState(descriptor: pipelineStateDesc, options: pipelineOption)
         
         commandQueue = device.makeCommandQueue()
         
