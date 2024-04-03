@@ -36,6 +36,41 @@ struct FragmentData {
 };
 
 [[fragment]]
-float4 frag(FragmentData in [[stage_in]]) {
-    return in.prim.color * float4(in.vert.uv, 0.0f, 1.0f);
+float4 frag(FragmentData in [[stage_in]],
+            metal::texture2d<float> tex [[texture(0)]])
+{
+    constexpr metal::sampler sam;
+    return tex.sample(sam, in.vert.uv);
+}
+
+struct BoundingBoxResult {
+    bool accept [[accept_intersection]];
+    float distance [[distance]];
+};
+struct Sphere { float3 center; float3 radius; };
+
+[[intersection(bounding_box)]]
+BoundingBoxResult inte(float3 origin [[origin]],
+                       float3 direction [[direction]],
+                       const device Sphere* sphere [[primitive_data]])
+{
+    BoundingBoxResult ret;
+    
+    return ret;
+}
+
+struct Uniforms {
+    unsigned int width;
+    unsigned int height;
+};
+
+[[kernel]]
+void kern(uint2 tid [[thread_position_in_threadgroup]],
+          uint2 size [[threads_per_threadgroup]],
+          constant Uniforms& uniforms,
+          metal::texture2d<float, metal::access::write> dstTex [[texture(0)]])
+{
+    float u = (float)tid.x / size.x;
+    float v = (float)tid.y / size.y;
+    dstTex.write(float4(u, v, 0.0f, 1.0f), tid);
 }
