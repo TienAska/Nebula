@@ -47,14 +47,20 @@ struct BoundingBoxResult {
     bool accept [[accept_intersection]];
     float distance [[distance]];
 };
-struct Sphere { float3 center; float3 radius; };
+struct Sphere { packed_float3 center; float radius; float padding; };
 
 [[intersection(bounding_box)]]
 BoundingBoxResult inte(float3 origin [[origin]],
                        float3 direction [[direction]],
-                       const device Sphere* sphere [[primitive_data]])
+                       const device void* data [[primitive_data]],
+                       ray_data float4& color [[payload]])
 {
     BoundingBoxResult ret;
+    ret.accept = true;
+    ret.distance = 0.4f;
+    color = float4(1.0f, 0.0f, 1.0f, 1.0f);
+    Sphere sphere = *(const device Sphere*) data;
+    sphere.padding = 0.5f;
     
     return ret;
 }
@@ -68,9 +74,32 @@ struct Uniforms {
 void kern(uint2 tid [[thread_position_in_threadgroup]],
           uint2 size [[threads_per_threadgroup]],
           constant Uniforms& uniforms,
-          metal::texture2d<float, metal::access::write> dstTex [[texture(0)]])
+          metal::texture2d<float, metal::access::write> dstTex [[texture(0)]],
+          metal::raytracing::primitive_acceleration_structure as [[buffer(0)]],
+          metal::raytracing::intersection_function_table<> ft [[buffer(1)]])
 {
+    metal::raytracing::intersector<> i;
+    typename metal::raytracing::intersector<>::result_type intersection;
+    
     float u = (float)tid.x / size.x;
     float v = (float)tid.y / size.y;
-    dstTex.write(float4(u, v, 0.0f, 1.0f), tid);
+    
+    metal::raytracing::ray r;
+    r.direction = float3(u, v, 1.0f);
+    r.origin = float3(0.0f, 0.0f, 0.0f);
+    float4 payload(0.8f, 0.0f, 0.1f, 1.0f);
+    intersection = i.intersect(r, as, ft, payload);
+    Sphere sphere = *(const device Sphere*)intersection.primitive_data;
+    
+    
+
+    if(intersection.primitive_data == nullptr)
+    {
+        dstTex.write(float4(u, v, 0.0f, 1.0f), tid);
+    }
+    else
+    {
+//        payload.b = sphere.padding;
+        dstTex.write(payload, tid);
+    }
 }
