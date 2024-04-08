@@ -8,13 +8,23 @@
 import Foundation
 import MetalKit
 
+struct Sphere
+{
+    var center = MTLPackedFloat3Make(0.0, 0.0, 0.0)
+    var radius = 1.0
+    var padding = 0.0
+}
+
 class RendererMS: NSObject, MTKViewDelegate
 {
     var device: MTLDevice
     var pipelineState: MTLRenderPipelineState!
     var commandQueue: MTLCommandQueue
     
-    var rendererRT: RendererRT!
+    var accelerationStructureDescriptor: MTLPrimitiveAccelerationStructureDescriptor
+    var accelerationSizes: MTLAccelerationStructureSizes
+    var accelerationStructure: MTLAccelerationStructure!
+    var intersectionFunctionTable: MTLIntersectionFunctionTable!
     
     init?(view: MTKView) {
         self.device = view.device!
@@ -23,27 +33,62 @@ class RendererMS: NSObject, MTKViewDelegate
         let defaultLibrary = self.device.makeDefaultLibrary()!
         let meshProgram = defaultLibrary.makeFunction(name: "mesh")
         let fragProgram = defaultLibrary.makeFunction(name: "frag")
+        let inteProgram = defaultLibrary.makeFunction(name: "inte")
         
         let pipelineStateDesc = MTLMeshRenderPipelineDescriptor()
         pipelineStateDesc.meshFunction = meshProgram
         pipelineStateDesc.fragmentFunction = fragProgram
+        let linkedFunctions = MTLLinkedFunctions()
+        linkedFunctions.functions = [inteProgram!]
+        pipelineStateDesc.fragmentLinkedFunctions = linkedFunctions
         pipelineStateDesc.colorAttachments[0].pixelFormat = .bgra8Unorm
         
         (self.pipelineState, _) = try! device.makeRenderPipelineState(descriptor: pipelineStateDesc, options: MTLPipelineOption())
         
-        rendererRT = RendererRT(view: view)
+        let sphere = Sphere()
+        let aabb = MTLAxisAlignedBoundingBox(min: MTLPackedFloat3Make(-1.0, -1.0, -1.0), max: MTLPackedFloat3Make(1.0, 1.0, 1.0))
+        let boundingBoxBuffer = self.device.makeBuffer(bytes: [aabb], length: MemoryLayout<MTLAxisAlignedBoundingBox>.size)
+        let primitiveData = self.device.makeBuffer(bytes: [sphere], length: MemoryLayout<Sphere>.size)
+        
+        self.accelerationStructureDescriptor = MTLPrimitiveAccelerationStructureDescriptor()
+        let geometryDescriptor = MTLAccelerationStructureBoundingBoxGeometryDescriptor()
+        geometryDescriptor.boundingBoxBuffer = boundingBoxBuffer
+        geometryDescriptor.boundingBoxCount = 1
+        geometryDescriptor.primitiveDataBuffer = primitiveData
+        geometryDescriptor.primitiveDataElementSize = MemoryLayout<Sphere>.size
+        geometryDescriptor.primitiveDataStride = MemoryLayout<Sphere>.stride
+        self.accelerationStructureDescriptor.geometryDescriptors = [geometryDescriptor]
+        
+        self.accelerationSizes = self.device.accelerationStructureSizes(descriptor: accelerationStructureDescriptor)
+        self.accelerationStructure = self.device.makeAccelerationStructure(size: self.accelerationSizes.accelerationStructureSize)
+        
+        
+        let intersectionFunctionTableDescriptor = MTLIntersectionFunctionTableDescriptor()
+        intersectionFunctionTableDescriptor.functionCount = 1
+        self.intersectionFunctionTable = self.pipelineState.makeIntersectionFunctionTable(descriptor: intersectionFunctionTableDescriptor, stage: .fragment)
+        let handle = self.pipelineState.functionHandle(function: inteProgram!, stage: .fragment)
+        self.intersectionFunctionTable.setFunction(handle, index: 0)
+       
         
         super.init()
     }
     
     func draw(in view: MTKView) {
-        self.rendererRT.draw(in: view)
-        
         let commandBuffer = commandQueue.makeCommandBuffer()!
-
+        
+        let scratchBuffer = self.device.makeBuffer(length: self.accelerationSizes.buildScratchBufferSize)!
+        
+        let accelerationEncoder = commandBuffer.makeAccelerationStructureCommandEncoder()!
+        accelerationEncoder.build(accelerationStructure: self.accelerationStructure,
+                                  descriptor: self.accelerationStructureDescriptor,
+                                  scratchBuffer: scratchBuffer,
+                                  scratchBufferOffset: 0)
+        accelerationEncoder.endEncoding()
+        
         let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: view.currentRenderPassDescriptor!)!
         renderEncoder.setRenderPipelineState(pipelineState)
-        renderEncoder.setFragmentTexture(rendererRT.texture, index: 0)
+        renderEncoder.setFragmentAccelerationStructure(self.accelerationStructure, bufferIndex: 0)
+        renderEncoder.setFragmentIntersectionFunctionTable(self.intersectionFunctionTable, bufferIndex: 1)
         renderEncoder.drawMeshThreads(MTLSizeMake(1, 1, 1), threadsPerObjectThreadgroup: MTLSizeMake(1, 1, 1), threadsPerMeshThreadgroup: MTLSizeMake(1, 1, 1))
         renderEncoder.endEncoding()
         
@@ -66,13 +111,6 @@ class RendererRT: NSObject, MTKViewDelegate
     var accelerationSizes: MTLAccelerationStructureSizes
     var accelerationStructure: MTLAccelerationStructure!
     var intersectionFunctionTable: MTLIntersectionFunctionTable!
-    
-    struct Sphere
-    {
-        var center = MTLPackedFloat3Make(0.0, 0.0, 0.0)
-        var radius = 1.0
-        var padding = 0.0
-    }
     
     init?(view: MTKView) {
         self.device = view.device!
@@ -120,8 +158,6 @@ class RendererRT: NSObject, MTKViewDelegate
         
         super.init()
     }
-    
-
     
     func draw(in view: MTKView) {
         let commandBuffer = self.commandQueue.makeCommandBuffer()!

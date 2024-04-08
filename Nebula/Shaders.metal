@@ -30,6 +30,8 @@ void mesh(triangle_mesh_t outputMesh, uint tid [[thread_index_in_threadgroup]]) 
     outputMesh.set_primitive_count(1);
 }
 
+struct Sphere { packed_float3 center; float radius; float padding; };
+
 struct FragmentData {
     VertexData vert;
     PrimitiveData prim;
@@ -37,17 +39,37 @@ struct FragmentData {
 
 [[fragment]]
 float4 frag(FragmentData in [[stage_in]],
-            metal::texture2d<float> tex [[texture(0)]])
+            metal::raytracing::primitive_acceleration_structure as [[buffer(0)]],
+            metal::raytracing::intersection_function_table<> ft [[buffer(1)]])
 {
-    constexpr metal::sampler sam;
-    return tex.sample(sam, in.vert.uv);
+    float u = in.vert.uv.x;
+    float v = in.vert.uv.y;
+    
+    metal::raytracing::intersector<> i;
+    typename metal::raytracing::intersector<>::result_type intersection;
+    
+    metal::raytracing::ray r;
+    r.direction = float3(u, v, 1.0f);
+    r.origin = float3(0.0f, 0.0f, 0.0f);
+    float4 payload(0.8f, 0.0f, 0.1f, 1.0f);
+    intersection = i.intersect(r, as, ft, payload);
+    Sphere sphere = *(const device Sphere*)intersection.primitive_data;
+    
+    if(intersection.primitive_data == nullptr)
+    {
+        return float4(u, v, 0.0f, 1.0f);
+    }
+    else
+    {
+//        payload.b = sphere.padding;
+        return payload;
+    }
 }
 
 struct BoundingBoxResult {
     bool accept [[accept_intersection]];
     float distance [[distance]];
 };
-struct Sphere { packed_float3 center; float radius; float padding; };
 
 [[intersection(bounding_box)]]
 BoundingBoxResult inte(float3 origin [[origin]],
