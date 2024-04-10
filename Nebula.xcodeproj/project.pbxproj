@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		221C95F12BB903A900DD5591 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 221C95F02BB903A900DD5591 /* Shaders.metal */; };
+		221C95F32BB9211200DD5591 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221C95F22BB9211200DD5591 /* Renderer.swift */; };
+		221C95F62BB9DA2600DD5591 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 221C95F52BB9DA2600DD5591 /* MetalKit.framework */; };
 		22DC39A82BB79A5B00CC18DE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22DC39A72BB79A5B00CC18DE /* AppDelegate.swift */; };
 		22DC39AA2BB79A5B00CC18DE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22DC39A92BB79A5B00CC18DE /* SceneDelegate.swift */; };
 		22DC39AC2BB79A5B00CC18DE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22DC39AB2BB79A5B00CC18DE /* ViewController.swift */; };
@@ -16,6 +19,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		221C95F02BB903A900DD5591 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		221C95F22BB9211200DD5591 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		221C95F52BB9DA2600DD5591 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		22DC39A42BB79A5B00CC18DE /* Nebula.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nebula.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		22DC39A72BB79A5B00CC18DE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		22DC39A92BB79A5B00CC18DE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -31,17 +37,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				221C95F62BB9DA2600DD5591 /* MetalKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		221C95F42BB9DA2600DD5591 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				221C95F52BB9DA2600DD5591 /* MetalKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		22DC399B2BB79A5B00CC18DE = {
 			isa = PBXGroup;
 			children = (
 				22DC39A62BB79A5B00CC18DE /* Nebula */,
 				22DC39A52BB79A5B00CC18DE /* Products */,
+				221C95F42BB9DA2600DD5591 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -63,6 +79,8 @@
 				22DC39B02BB79A5C00CC18DE /* Assets.xcassets */,
 				22DC39B22BB79A5C00CC18DE /* LaunchScreen.storyboard */,
 				22DC39B52BB79A5C00CC18DE /* Info.plist */,
+				221C95F02BB903A900DD5591 /* Shaders.metal */,
+				221C95F22BB9211200DD5591 /* Renderer.swift */,
 			);
 			path = Nebula;
 			sourceTree = "<group>";
@@ -138,8 +156,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				221C95F12BB903A900DD5591 /* Shaders.metal in Sources */,
 				22DC39AC2BB79A5B00CC18DE /* ViewController.swift in Sources */,
 				22DC39A82BB79A5B00CC18DE /* AppDelegate.swift in Sources */,
+				221C95F32BB9211200DD5591 /* Renderer.swift in Sources */,
 				22DC39AA2BB79A5B00CC18DE /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
